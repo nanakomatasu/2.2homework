@@ -426,7 +426,7 @@
           <td>第${item.group}组</td>
           <td>${item.hope_salary}</td>
           <td>${item.salary}</td>
-          <td>${item.province}${item.city}${item.area}</td>
+          <td>${item.province} ${item.city} ${item.area}</td>
           <td>
             <a href="javascript:;" class="text-success mr-3" d><i class="bi bi-pen" data-id="${
               item.id
@@ -463,10 +463,26 @@
             document.querySelector(".modal-title").innerHTML = "修改学员";
             modalBox.id = id;
             modalBox.show();
-            const res = await axios({
+            const { data } = await axios({
               method: "get",
               url: `/students/${id}`,
             });
+            console.log(data);
+            console.log(data.gender);
+            console.log(document.querySelectorAll("[name=gender]"));
+            for (const key in data) {
+              const ipt = document.querySelector(`[name=${key}]`);
+              if (key !== "gender") {
+                ipt !== null && (ipt.value = data[key]);
+              } else {
+                const genders = document.querySelectorAll("[name=gender]");
+                genders[data.gender].checked = true;
+              }
+            }
+            console.log(data);
+            await renderProvince(data.province);
+            await renderCity(data.city);
+            await renderArea(data.area);
           }
         });
 
@@ -504,6 +520,19 @@
             console.log(err.response.data.message);
           }
         } else {
+          const id = modalBox.id;
+          try {
+            const res = await axios({
+              method: "put",
+              url: `/students/${id}`,
+              data,
+            });
+            alert(res.message);
+            modalBox.hide();
+            rander();
+          } catch (err) {
+            console.log(err.response.data.message);
+          }
         }
       });
       //获取省市区
@@ -513,8 +542,9 @@
           return `<option value="${item}">${item}</ option>`;
         });
         p.innerHTML = pArr.join("");
+        province !== "" && (p.value = province);
       }
-      async function renderCity(province = "") {
+      async function renderCity(city = "") {
         const { data } = await axios.get("/api/city", {
           params: {
             pname: p.value,
@@ -524,8 +554,9 @@
           return `<option value="${item}">${item}</ option>`;
         });
         c.innerHTML = cArr.join("");
+        city !== "" && (c.value = city);
       }
-      async function renderArea(province = "") {
+      async function renderArea(area = "") {
         const { data } = await axios.get("/api/area", {
           params: {
             pname: p.value,
@@ -537,6 +568,7 @@
           return `<option value="${item}">${item}</ option>`;
         });
         a.innerHTML = aArr.join("");
+        area !== "" && (a.value = area);
       }
       const init = async () => {
         Promise.all([
