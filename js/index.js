@@ -14,6 +14,7 @@ async function getBack() {
   // console.log(salaryArr);
   const groupArr = res.data.groupData;
   const salaryArr = res.data.salaryData;
+  const provinceData = res.data.provinceData;
   console.log(salaryArr);
   let sA1 = [];
   let sA2 = [];
@@ -347,6 +348,14 @@ async function getBack() {
       { name: "香港", value: 0 },
       { name: "澳门", value: 0 },
     ];
+    console.log(provinceData);
+    provinceData.forEach((item) => {
+      dataList.find((v) => {
+        if (item.name.indexOf(v.name) !== -1) {
+          v.value = item.value;
+        }
+      });
+    });
     let option = {
       title: {
         text: "籍贯分布",
@@ -414,7 +423,8 @@ async function getBack() {
     };
     myEchart.setOption(option);
   };
-  initMapChart();
+
+  initMapChart(provinceData);
   //地图
   for (const k in arr) {
     document.querySelector(`[name=${k}]`).innerHTML = arr[k];
