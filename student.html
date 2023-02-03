@@ -426,7 +426,7 @@
           <td>第${item.group}组</td>
           <td>${item.hope_salary}</td>
           <td>${item.salary}</td>
-          <td>${item.province}</td>
+          <td>${item.province}${item.city}${item.area}</td>
           <td>
             <a href="javascript:;" class="text-success mr-3" d><i class="bi bi-pen" data-id="${
               item.id
@@ -467,32 +467,46 @@
               method: "get",
               url: `/students/${id}`,
             });
-            console.log(res.data);
-            console.log(res.data.name);
-            document.querySelector("#form [name=name]").value = res.data.name;
-            document.querySelector("#form [name=province]").value =
-              res.data.province;
-            document.querySelector("#form [name=area]").value = res.data.area;
-            document.querySelector("#form [name=group]").value = res.data.group;
-            document.querySelector("#form [name=salary]").value =
-              res.data.salary;
-            document.querySelector("#form [name=hope_salary]").value =
-              res.data.hope_salary;
-            document.querySelector("#form [name=city]").value = res.data.city;
-            document.querySelector("#form [name=age]").value = res.data.age;
-
-            console.log(1);
           }
         });
 
       document
         .querySelector("#openModal")
         .addEventListener("click", async () => {
+          document.querySelector("#form").reset();
+          await renderCity();
+          await renderArea();
           document.querySelector(".modal-title").innerHTML = "添加学员";
           modalBox.id = "add";
           modalBox.show();
         });
 
+      document.querySelector("#submit").addEventListener("click", async () => {
+        //获取数据
+        const data = serialize(document.querySelector("#form"), { hash: true });
+        //处理数据
+        for (const k in data) {
+          if (isNaN(data[k]) === false) {
+            data[k] = +data[k];
+          }
+        }
+        if (modalBox.id === "add") {
+          try {
+            const res = await axios({
+              method: "post",
+              url: "/students",
+              data,
+            });
+            alert("添加成功");
+            modalBox.hide();
+            rander();
+          } catch (err) {
+            console.log(err.response.data.message);
+          }
+        } else {
+        }
+      });
+      //获取省市区
       async function renderProvince(province = "") {
         const { data } = await axios.get("/api/province");
         const pArr = data.map((item) => {
@@ -532,6 +546,15 @@
         ]);
       };
       init();
+      //做联动
+      p.addEventListener("change", async () => {
+        await renderCity();
+        await renderArea();
+      });
+
+      c.addEventListener("change", async () => {
+        await renderArea();
+      });
     </script>
   </body>
 </html>
