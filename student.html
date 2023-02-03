@@ -388,6 +388,9 @@
     <script src="./lib/form-serialize.js"></script>
     <script src="./js/common.js"></script>
     <script>
+      const p = document.querySelector("[name=province]");
+      const c = document.querySelector("[name=city]");
+      const a = document.querySelector("[name=area]");
       async function getBack() {
         const res = await axios({
           method: "get",
@@ -404,7 +407,7 @@
       const name1 = document.querySelector(".d-lg-block .font-weight-bold");
 
       name1 && (name1.innerHTML = username);
-
+      const modalBox = new bootstrap.Modal(document.querySelector("#modal"));
       async function rander() {
         const student = await axios({
           method: "get",
@@ -455,9 +458,80 @@
             } catch (err) {
               alert("未找到该学生");
             }
-          } else if (e.target.classList.contains("bi-pen")) {
+          } //修改学生信息
+          else if (e.target.classList.contains("bi-pen")) {
+            document.querySelector(".modal-title").innerHTML = "修改学员";
+            modalBox.id = id;
+            modalBox.show();
+            const res = await axios({
+              method: "get",
+              url: `/students/${id}`,
+            });
+            console.log(res.data);
+            console.log(res.data.name);
+            document.querySelector("#form [name=name]").value = res.data.name;
+            document.querySelector("#form [name=province]").value =
+              res.data.province;
+            document.querySelector("#form [name=area]").value = res.data.area;
+            document.querySelector("#form [name=group]").value = res.data.group;
+            document.querySelector("#form [name=salary]").value =
+              res.data.salary;
+            document.querySelector("#form [name=hope_salary]").value =
+              res.data.hope_salary;
+            document.querySelector("#form [name=city]").value = res.data.city;
+            document.querySelector("#form [name=age]").value = res.data.age;
+
+            console.log(1);
           }
         });
+
+      document
+        .querySelector("#openModal")
+        .addEventListener("click", async () => {
+          document.querySelector(".modal-title").innerHTML = "添加学员";
+          modalBox.id = "add";
+          modalBox.show();
+        });
+
+      async function renderProvince(province = "") {
+        const { data } = await axios.get("/api/province");
+        const pArr = data.map((item) => {
+          return `<option value="${item}">${item}</ option>`;
+        });
+        p.innerHTML = pArr.join("");
+      }
+      async function renderCity(province = "") {
+        const { data } = await axios.get("/api/city", {
+          params: {
+            pname: p.value,
+          },
+        });
+        const cArr = data.map((item) => {
+          return `<option value="${item}">${item}</ option>`;
+        });
+        c.innerHTML = cArr.join("");
+      }
+      async function renderArea(province = "") {
+        const { data } = await axios.get("/api/area", {
+          params: {
+            pname: p.value,
+            cname: c.value,
+          },
+        });
+
+        const aArr = data.map((item) => {
+          return `<option value="${item}">${item}</ option>`;
+        });
+        a.innerHTML = aArr.join("");
+      }
+      const init = async () => {
+        Promise.all([
+          await renderProvince(),
+          await renderCity(),
+          await renderArea(),
+        ]);
+      };
+      init();
     </script>
   </body>
 </html>
